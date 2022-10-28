@@ -1,0 +1,7 @@
+<launch>
+  <arg name="parameter_file" default="config.yaml" />
+
+  <rosparam command="load" file="$(find locnerf)/cfg/$(arg parameter_file)" />
+
+  <node pkg="locnerf" type="nav_node.py" name="nav_node" output="screen" />
+</launch>

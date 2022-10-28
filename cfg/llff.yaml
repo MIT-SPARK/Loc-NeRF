@@ -1,0 +1,118 @@
+#### filtering flags ####
+run_predicts: False # Use odometry for predict step, otherwise use 0 mean gaussian noise.
+use_received_image: False # Update the sensor image.
+center_about_true_pose: True # Use gt orientation as the mean pose to generate an initial start pose - if False use origin.
+use_weighted_avg: True # Use weighted average to computer position estimate, otherwise use simple average.
+no_ndc: False # note that custom data cannot use ndc but LLFF should
+
+#### main update step params ####
+factor: 4 # image down-sample factor
+course_samples: 64 # number course samples per ray
+fine_samples: 64 # number fine samples per ray
+photometric_loss: rgb # rgb
+sampling_strategy: random # only random is supported right now
+batch_size: 64 # number of pixels to use for measurement points
+num_particles: 300 # Number of initial particles.
+
+#### dataset and weight loading ####
+dataset_type: llff # llff, custom
+ckpt_dir: /home/dominic/inerf/ckpts
+data_dir: /home/dominic/inerf/data/nerf_llff_data # only needed for LLFF data
+
+#### convergence protection #####
+# randomly sample a few particle positions to protect against false convergence
+# TODO eventually want to just remove the lowest weight particles instead of random particles
+use_convergence_protection: True
+number_convergence_particles: 10 # number of particles to distribute
+convergence_noise: 0.2 # meters, uniformly sample this far from mean for each axis.
+
+#### inerf comparision ####
+run_inerf_compare: True
+global_loc_mode: False # Perform Loc-NeRF with Loc-NeRF.
+log_results: False # Save pose estimate for each iteration. Also save a file with gt pose and the initial pose guess if use_logged_start is False.
+use_logged_start: True # use saved logs for initial pose
+log_prefix: use_annealing # add a prefix to the log file names for convenience to keep track of different runs
+log_directory: /home/dominic/mocNeRF_ws/src/locnerf/logs/inerf_compare # Directory to save npy files.
+forward_passes_limit: 78643200 # end optimization after this number of forward passes have run
+
+#### custom data realtime tracking mode params ####
+# Note these values are all overwritten/not used if run_inerf_compare is True
+# subscriber topics
+rgb_topic: /camera/color/image_raw
+vio_topic: /vins_estimator/odometry
+focal: 635
+H: 720
+W: 1280
+# Near and far bounds of the NeRF scene, should be similar to how the NeRF was trained.
+near: 0
+far: 8
+# set distribution of particles, units are meters and degrees 
+min_bounds:
+  px: -0.5
+  py: -0.3
+  pz: 0.0
+  rz: -2.5
+  ry: -179.0
+  rx: -2.5
+max_bounds:
+  px: 0.5
+  py: 0.2
+  pz: 3.5
+  rz: 2.5
+  ry: 179.0
+  rx: 2.5
+# rotation from the body frame of VIO to the NeRF camera frame (x right, y up, z inward). all values in radians
+R_bodyVins_camNerf: 
+  rz: 0.0
+  ry: 0.0
+  rx: 3.14159256
+
+#### Nerf Navigation comparision ####
+# uses user set distribution of particles
+run_nerfnav_compare: False
+nerf_nav_directory : /home/dominic/Downloads/input_data1
+
+#### particle annealing params ####
+use_refining: True # Decrease position noise as we start to converge.
+use_particle_reduction: True # Reduce number of particles as they start to converge
+min_number_particles: 100 # reduce particles to this amount during particle reduction
+
+# position standard deviation thresholds to activate particle annealing
+alpha_refine: 0.08
+alpha_super_refine: 0.03
+
+#### motion model noise params ####
+# position noise
+px_noise: 0.01
+py_noise: 0.01
+pz_noise: 0.01
+# rotation noise
+rot_x_noise: 0.02
+rot_y_noise: 0.02
+rot_z_noise: 0.02
+
+#### visualization params ####
+visualize_particles: True # publish particles for rviz
+view_debug_image_iteration: 0 # view NeRF rendered image at estimated pose after number of iterations (set to 0 to disable)
+
+####### DO NOT CHANGE THESE UNLESS YOU KNOW WHAT YOU ARE DOING ########
+# These are params from iNeRF and NeRF-Pytorch
+# In general they should be the same as how the NeRF model was changed
+multires: 10 # log2 of max freq for positional encoding (3D location)
+multires_views: 4 # log2 of max freq for positional encoding (2D direction)
+i_embed: 0 # set 0 for default positional encoding, -1 for none
+netdepth: 8 # layers in network
+netwidth: 256 # channels per layer
+netdepth_fine: 8 # layers in fine network
+netwidth_fine: 256 # channels per layer in fine network
+use_viewdirs: True
+perturb: 0 # set to 0. for no jitter, 1. for jitter
+white_bkgd: False # set to render synthetic data on a white bkgd (always use for dvoxels)
+raw_noise_std: 1.0 # std dev of noise added to regularize sigma_a output, 1e0 recommended
+lindisp: False # sampling linearly in disparity rather than depth
+chunk: 65536 # 1024x64 # number of rays processed in parallel, decrease if running out of memory
+netchunk: 65536 # 1024x64 # number of pts sent through network in parallel, decrease if running out of memory
+bd_factor: 0.75
+kernel_size: 3
+lrate: 0.01
+dil_iter: 3 # only used with interest_regions sampling

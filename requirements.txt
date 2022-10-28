@@ -1,0 +1,14 @@
+cv_bridge
+gtsam
+imageio
+matplotlib
+numpy
+rospy
+rostopic
+scipy
+sensor_msgs
+opencv_contrib_python
+torch
+torch_ema
+torchvision
+tqdm

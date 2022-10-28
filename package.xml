@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>locnerf</name>
+  <version>0.1.0</version>
+  <description>Run particle filter with NeRF and VIO</description>
+
+  <maintainer email="drmaggio@mit.edu">Dominic Maggio</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>std_msgs</build_depend>
+
+  <export>
+  </export>
+</package>
